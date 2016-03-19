@@ -16,6 +16,7 @@
 // The maximum number of client connections we can accept.
 constexpr int MAX_SESSIONS = 1024;
 
+constexpr int FILE_SERVER_PORT = 8080;
 constexpr int DEFAULT_CLIENT_PORT_NUMBER = 9980;
 constexpr int MASTER_PORT_NUMBER = 9981;
 constexpr int ADMIN_PORT_NUMBER = 9989;
@@ -37,6 +38,8 @@ constexpr int SMALL_MESSAGE_SIZE = READ_BUFFER_SIZE / 2;
 static const std::string JailedDocumentRoot = "/user/docs/";
 static const std::string CHILD_URI = "/loolws/child?";
 static const std::string LOLEAFLET_PATH = "/loleaflet/dist/loleaflet.html?";
+static const std::string SSL_CERT_FILE = "cert.pem";
+static const std::string SSL_KEY_FILE = "key.pem";
 
 #endif
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
