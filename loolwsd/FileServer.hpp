@@ -68,10 +68,9 @@ public:
             if (request.getMethod() == HTTPRequest::HTTP_GET)
             {
                 // FIXME: Some nice way to ask for credentials for protected files
-                if ((requestSegments.size() == 1) &&
-                    (endPoint == "admin.html" ||
-                     endPoint == "adminSettings.html" ||
-                     endPoint == "adminAnalytics.html"))
+                if (endPoint == "admin.html" ||
+                    endPoint == "adminSettings.html" ||
+                    endPoint == "adminAnalytics.html")
                 {
                     HTTPBasicCredentials credentials(request);
                     // TODO: Read username and password from config file
