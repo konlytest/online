@@ -32,6 +32,7 @@
 #include <Poco/Util/Timer.h>
 
 #include "Common.hpp"
+#include "LOOLWSD.hpp"
 
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPRequestHandler;
@@ -60,8 +61,8 @@ public:
             std::vector<std::string> requestSegments;
             requestUri.getPathSegments(requestSegments);
 
-            // FIXME: We might want to package all dist files from leaflet to some other dir (?)
-            const std::string loleafletPath = Poco::Path(Application::instance().commandPath()).parent().parent().toString() + "loleaflet";
+            // TODO: We might want to package all files from leaflet to some other dir and restrict
+            // file serving to it (?)
             const std::string endPoint = requestSegments[requestSegments.size() - 1];
 
             if (request.getMethod() == HTTPRequest::HTTP_GET)
@@ -85,7 +86,7 @@ public:
                         Poco::Net::HTTPCookie cookie("jwt", jwtToken);
                         response.addCookie(cookie);
                         response.setContentType(htmlMimeType);
-                        response.sendFile(loleafletPath + "/debug/document/" + endPoint, htmlMimeType);
+                        response.sendFile(LOOLWSD::FileServerRoot + requestUri.getPath(), htmlMimeType);
                     }
                     else
                     {
@@ -93,12 +94,12 @@ public:
                         throw Poco::Net::NotAuthenticatedException("Wrong credentials.");
                     }
                 }
-                else if (requestSegments.size() > 1 && requestSegments[0] == "dist")
+                else
                 {
                     const std::string filePath = requestUri.getPath();
                     const std::size_t extPoint = endPoint.find_last_of(".");
                     if (extPoint == std::string::npos)
-                        return;
+                        throw Poco::FileNotFoundException("Invalid file.");
 
                     const std::string fileType = endPoint.substr(extPoint + 1);
                     std::string mimeType;
@@ -106,15 +107,13 @@ public:
                         mimeType = "application/javascript";
                     else if (fileType == "css")
                         mimeType = "text/css";
+                    else if (fileType == "html")
+                        mimeType = "text/html";
                     else
                         mimeType = "text/plain";
 
                     response.setContentType(mimeType);
-                    response.sendFile(loleafletPath + request.getURI(), mimeType);
-                }
-                else
-                {
-                    throw Poco::FileNotFoundException("");
+                    response.sendFile(LOOLWSD::FileServerRoot + requestUri.getPath(), mimeType);
                 }
             }
         }
