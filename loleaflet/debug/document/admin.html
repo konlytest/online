@@ -37,19 +37,7 @@
     <script>vex.defaultOptions.className = 'vex-theme-plain';</script>
     <script>
 
-	function getParameterByName(name) {
-		name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-		results = regex.exec(location.search);
-		return results === null ? "" : results[1].replace(/\+/g, " ");
-	}
-
-	var host = getParameterByName('host');
-	// if (host === '') {
-	//vex.dialog.alert('Wrong host, usage: host=ws://localhost:9989');
-	//}
-
-	host = "wss://localhost:9989";
+	host = 'wss://' + window.location.hostname + ':9989';
 	new AdminSocketOverview(host);
 
     </script>
