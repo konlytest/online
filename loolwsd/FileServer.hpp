@@ -48,13 +48,8 @@ using Poco::Util::Application;
 class FileServerRequestHandler: public HTTPRequestHandler
 {
 public:
-    FileServerRequestHandler()
-    { }
-
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response) override
     {
-        assert(request.serverAddress().port() == FILE_SERVER_PORT);
-
         try
         {
             Poco::URI requestUri(request.getURI());
@@ -83,6 +78,9 @@ public:
                         JWTAuth authAgent(keyPath, "admin", "admin", "admin");
                         const std::string jwtToken = authAgent.getAccessToken();
                         Poco::Net::HTTPCookie cookie("jwt", jwtToken);
+                        cookie.setPath("/adminws/");
+                        cookie.setSecure(true);
+                        cookie.setHttpOnly(true);
                         response.addCookie(cookie);
                         response.setContentType(htmlMimeType);
                         response.sendFile(LOOLWSD::FileServerRoot + requestUri.getPath(), htmlMimeType);
@@ -134,38 +132,10 @@ public:
     }
 };
 
-class FileServerRequestHandlerFactory: public HTTPRequestHandlerFactory
-{
-public:
-    FileServerRequestHandlerFactory()
-    {    }
-
-    HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request) override
-    {
-        auto logger = Log::info();
-        logger << "Request from " << request.clientAddress().toString() << ": "
-               << request.getMethod() << " " << request.getURI() << " "
-               << request.getVersion();
-
-        for (HTTPServerRequest::ConstIterator it = request.begin(); it != request.end(); ++it)
-        {
-            logger << " / " << it->first << ": " << it->second;
-        }
-
-        logger << Log::end;
-
-        return new FileServerRequestHandler();
-    }
-};
-
-/// A HTTP(S) file server
-class FileServer : public Poco::Runnable
+class FileServer
 {
 public:
     FileServer()
-        : _srv(new FileServerRequestHandlerFactory(),
-               SecureServerSocket(FILE_SERVER_PORT),
-               new HTTPServerParams)
     {
         Log::info("HTTP File server ctor.");
     }
@@ -173,17 +143,12 @@ public:
     ~FileServer()
     {
         Log::info("HTTP File Server dtor.");
-        _srv.stopAll();
     }
 
-    void run()
+    FileServerRequestHandler* createRequestHandler()
     {
-        Log::info ("HTTP File server listening on " + std::to_string(FILE_SERVER_PORT));
-        _srv.start();
+        return new FileServerRequestHandler();
     }
-
-private:
-    Poco::Net::HTTPServer _srv;
 };
 
 #endif
